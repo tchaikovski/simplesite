@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
 
 from .forms import BbFrom
 from .models import Bb, Rubric
@@ -11,7 +12,7 @@ from .models import Bb, Rubric
 class BbCreateView(CreateView):
     template_name = 'bboard/create.html'  # путь шаблона
     form_class = BbFrom  # ссылка на модель формы
-    success_url = '/bboard/'  # перенаправление после создания объявления
+    success_url = reverse_lazy('index')  # перенаправление после создания объявления
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

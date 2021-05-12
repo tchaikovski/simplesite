@@ -4,5 +4,7 @@ from .models import Bb
 
 
 class BbFrom(ModelForm):
-    model = Bb
-    fields = ('title', 'content', 'price', 'rubric')
+    class Meta:
+        model = Bb
+        fields = '__all__'
+    # fields = ('title', 'content', 'price', 'rubric')
