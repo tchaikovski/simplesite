@@ -55,7 +55,6 @@ class Bb(models.Model):
         if errors:
             raise ValidationError(errors)
 
-
     class Meta:
         verbose_name_plural = 'Объявления'
         verbose_name = 'Объявление'
