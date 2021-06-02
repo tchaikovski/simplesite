@@ -2,11 +2,30 @@
 {% block title %}{{ current_rubric.name }}{% endblock %}
 {% block content %}
     <h2>Рубрика: {{ current_rubric.name }}</h2>
+
+
+
+
+
     {% for bb in bbs %}
-        <div>
-            <h2>{{ bb.title }}</h2>
+
+        {% with bb_count=bbs.count %}
+            {% if bb_count > 0 %}
+            <p>Всего {{ bb_count }} объявлений.</p>
+            {% endif %}
+        {% endwith %}
+
+
+
+
+        --{% cycle 'bbl' 'bb2' 'bb3' as class %}--
+        <div class="{{ class }}">
+        <p>№№ {{ forloop.counter }}</p>
+            <h2><a href="{% url 'detail' pk=bb.pk %}"> {{ bb.title }}</a></h2>
             <p>{{ bb.content }}</p>
             <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
+        {% firstof bb.phone bb.email 'На деревню дедушке' %}
+{#            #  если одно из полей не заполнено#}
         </div>
     {% endfor %}
 {% endblock %}

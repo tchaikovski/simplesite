@@ -1,13 +1,46 @@
 {% extends 'layout/basic.html' %}
 {% block content %}
-    {% for bb in bbs %}
-    <div>
-        <h2>{{ bb.title }}</h2>
-        <p>{{ bb.content }}</p>
-        <p><a href="{% url 'by_rubric' bb.rubric.pk %}">{{ bb.rubric.name }}</a></p>
-        {#        <p><a href="/bboard/{{ bb.rubric.pk }}/">{{ bb.rubric.name }}</a> </p>#}
-        <p>{{ bb.published|date:"d.n.Y H:i:s" }}</p>
-    </div>
-{% endfor %}
+    {% regroup bbs by rubric.name as grouped_bbs %}
+
+
+
+    {% for rubric_name, gbbs in grouped_bbs %}
+
+        <h3>{{ rubric_name }}</h3>
+
+
+        {% for bb in gbbs %}
+            {#    {% for bb in bbs %}#}
+
+
+
+
+            {% with bb_count=bbs.count %}
+                {% if bb_count > 0 %}
+                    <p>Всего {{ bb_count }} объявлений.</p>
+                {% endif %}
+            {% endwith %}
+
+
+            <div>
+                <h2><a href="{% url 'detail' pk=bb.pk %}"> {{ bb.title }}</a></h2>
+                {% autoescape off %}
+                    {% spaceless %}
+                        {#    удаляет в содержимом пробельные символы#}
+                        <p>{{ bb.content }}</p>
+                    {% endspaceless %}
+                {% endautoescape %}
+            <p>{{ bb.price|default:'<b>У товара нет цены</b>' }}</p>
+                <p><a href="{% url 'by_rubric' bb.rubric.pk %}">{{ bb.rubric.name }}</a></p>
+                {#        <p><a href="/bboard/{{ bb.rubric.pk }}/">{{ bb.rubric.name }}</a> </p>#}
+                <p>{{ bb.published|date:"d.n.Y H:i:s" }}</p>
+                <p>{{ bb.published|time }}</p>
+            </div>
+        {% endfor %}
+        {% for d in date_list %}
+            {{ d.year }}
+        {% endfor %}
+    {% endfor %}
 {% endblock %}
 
+{#{% verbatim %} аналог литерал#}

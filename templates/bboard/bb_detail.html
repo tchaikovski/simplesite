@@ -1,0 +1,22 @@
+{% extends "layout/basic.html" %}
+{% block title %}{{ bb.title }}{% endblock %}
+
+{% block content %}
+
+    <a href="{% url 'edit' pk=bb.pk %}">Изменить</a>
+    <a href="{% url 'delete' pk=bb.pk %}">Удалить</a>
+<p>Рубрика: {{ bb.get_kind_display  }} {{ bb.rubric.name.lower }}</p>
+
+{{ current_rubric.name }}
+
+{#   <p>1 {{ bb.Kinds.label }} </p>#}
+{#  <p> 2 {{ bb.get_kind_display  }} </p>#}
+{#   <p> 3{{     bb.Kinds.choices }} </p>#}
+
+{#<p>{{ current_bb.kind }}</p> не работает#}
+{#    {{ bb.kind.title.0 }} Нужно как то решить с переменными#}
+
+    <h2>{{ bb.title }}</h2>
+    <p>{{ bb.content }}</p>
+    <p>Цена: {{ bb.price }}</p>
+{% endblock %}

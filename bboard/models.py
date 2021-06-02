@@ -12,6 +12,9 @@ class Bb(models.Model):
         EXCHANGE = 'c', 'Обменяю'
         RENT = 'r', 'Арендую'
 
+        def __str__(self):
+            return self.label
+
     # KINDS = (
     #     ('b', 'Куплю'),
     #     ('s', 'Продам'),
