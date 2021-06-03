@@ -152,7 +152,7 @@ class BbIndexView(ArchiveIndexView):
 def index(request):
     rubrics = Rubric.objects.all()
     bbs = Bb.objects.all()
-    paginator = Paginator(bbs, 2)
+    paginator = Paginator(bbs, 3)
     if 'page' in request.GET:
         page_num = request.GET['page']
     else:
