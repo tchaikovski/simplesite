@@ -1,13 +1,18 @@
 {% extends 'layout/basic.html' %}
 {% block title %}
-Добавление объявления
+    Добавление объявления
 {% endblock %}
 {% block content %}
-<h1>Добавление объявления</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Добавить">
+    <h1>Добавление объявления</h1>
+    {% if form.is_multipart %}
+        <form enctype="multipart/form-data" method="post">
+    {% else %}
+        <form method="post">
+    {% endif %}
+{% csrf_token %}
+{{ form.as_p }}
+    {{ form.content }}
+<input type="submit" value="Добавить">
 </form>
 {% endblock %}
 

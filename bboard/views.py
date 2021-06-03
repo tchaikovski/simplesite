@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 # StreamingHttpResponse
 # from django.template import loader
@@ -12,9 +12,15 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy, reverse
 # from django.views.decorators.http import require_http_methods
+from django.forms import modelform_factory, DecimalField, ModelForm
+from django.forms.widgets import Select
+from django.forms import modelform_factory
+from django.forms.formsets import ORDERING_FIELD_NAME
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.core.paginator import Paginator
 from django.views.decorators.gzip import gzip_page
-from .forms import BbFrom
+from .forms import BbForm
+from django import forms
 from .models import Bb, Rubric
 
 
@@ -63,7 +69,7 @@ class BbDetailView(DetailView):
 
 class BbAddView(FormView):
     template_name = 'bboard/create_add.html'
-    form_class = BbFrom
+    form_class = BbForm
     initial = {'price': 0.0}
 
     def get_context_data(self, *args, **kwargs):
@@ -85,7 +91,7 @@ class BbAddView(FormView):
 
 class BbEditView(UpdateView):
     model = Bb
-    form_class = BbFrom
+    form_class = BbForm
     success_url = '/'
 
     def get_context_data(self, *args, **kwargs):
@@ -97,7 +103,7 @@ class BbEditView(UpdateView):
 # Форма создания объявления
 class BbCreateView(CreateView):
     template_name = 'bboard/create.html'  # путь шаблона
-    form_class = BbFrom  # ссылка на модель формы
+    form_class = BbForm  # ссылка на модель формы
     success_url = reverse_lazy('index')  # перенаправление после создания объявления
 
     def get_context_data(self, *args, **kwargs):
@@ -130,6 +136,42 @@ class BbIndexView(ArchiveIndexView):
         return context
 
 
+def index(request):
+    rubrics = Rubric.objects.all()
+    bbs = Bb.objects.all()
+    paginator = Paginator(bbs, 3)
+    if 'page' in request.GET:
+        page_num = request.GET['page']
+    else:
+        page_num = 1
+    page = paginator.get_page(page_num)
+    context = {'rubrics': rubrics, 'page': page, 'bbs': page.object_list}
+    return render(request, 'bboard/index.html', context)
+
+
+@gzip_page  # сжатие страницы
+def rubric(request):
+    RubricFormSet = modelform_factory(Rubric, fields=('name',), can_order=True, can_delete=True)
+    if request.method == 'POST':
+        formset = RubricFormSet(request.POST)
+        if formset.is_valid():
+            formset.save()
+            return redirect('index')
+    else:
+        formset = RubricFormSet()
+    context = {'formset': formset}
+    return render(request, 'bboard/rubrics.html', context)
+
+
+
+@gzip_page  # сжатие страницы
+def by_rubric(request, rubric_id):
+    bbs = Bb.objects.filter(rubric=rubric_id)
+    rubrics = Rubric.objects.all()
+    current_rubric = Rubric.objects.get(pk=rubric_id)
+    context = {'bbs': bbs, 'rubrics': rubrics, 'current_rubric': current_rubric}
+    return render(request, 'bboard/by_rubric.html', context)
+
 # # Вывод главной страницы
 # @gzip_page
 # def index(request):
@@ -149,27 +191,15 @@ class BbIndexView(ArchiveIndexView):
 #     # return render(request, '/bboard/index.html', context)
 
 
-def index(request):
-    rubrics = Rubric.objects.all()
-    bbs = Bb.objects.all()
-    paginator = Paginator(bbs, 3)
-    if 'page' in request.GET:
-        page_num = request.GET['page']
-    else:
-        page_num = 1
-    page = paginator.get_page(page_num)
-    context = {'rubrics': rubrics, 'page': page, 'bbs': page.object_list}
-    return render(request, 'bboard/index.html', context)
-
 # Функция добавления объявления
 # def add(request):
-#     bbf = BbFrom()
+#     bbf = BbForm()
 #     context = {'form': bbf}
 #     return render(request, 'bboard/create_add.html', context)
 #
 
 # def add_save(request):
-#     bbf = BbFrom(request.POST)
+#     bbf = BbForm(request.POST)
 #     if bbf.is_valid():
 #         bbf.save()
 #         return HttpResponseRedirect(reverse('by_rubric', kwargs={'rubric_id': bbf.cleaned_data['rubric'].pk}))
@@ -180,7 +210,7 @@ def index(request):
 #
 # def add_and_save(request):
 #     if request.method == 'POST':
-#         bbf = BbFrom(request.POST)
+#         bbf = BbForm(request.POST)
 #         if bbf.is_valid():
 #             bbf.save()
 #             return HttpResponseRedirect(reverse('by_rubric', kwargs={'rubric_id': bbf.cleaned_data['rubric'].pk}))
@@ -188,19 +218,13 @@ def index(request):
 #             context = {'form': bbf}
 #             return render(request, 'bboard/create_add.html', context)
 #     else:
-#         bbf = BbFrom()
+#         bbf = BbForm()
 #         context = {'form': bbf}
 #         return render(request, 'bboard/create_add.html', context)
+# RubricFormSet = modelform_factory(Rubric, fields=('name',)), can_order=True, can_delete=True
 
 #
 # Функция обработки категорий
-@gzip_page  # сжатие страницы
-def by_rubric(request, rubric_id):
-    bbs = Bb.objects.filter(rubric=rubric_id)
-    rubrics = Rubric.objects.all()
-    current_rubric = Rubric.objects.get(pk=rubric_id)
-    context = {'bbs': bbs, 'rubrics': rubrics, 'current_rubric': current_rubric}
-    return render(request, 'bboard/by_rubric.html', context)
 
 
 # Низкоуровневый ответ

@@ -1,13 +1,46 @@
 {% extends 'layout/basic.html' %}
 {% block title %}
-Добавление объявления
+    Добавление объявления
 {% endblock %}
 {% block content %}
-<h1>Добавление объявления</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Добавить">
+    <h1>Добавление объявления</h1>
+    {% if form.is_multipart %}
+        <form enctype="multipart/form-data" method="post">
+    {% else %}
+        <form method="post">
+    {% endif %}
+{% csrf_token %}
+
+
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+    {% if form.non_field_errors %}
+    <ul>
+    {% for error in form.non_field_errors %}
+    <li><em>{{ error|escape }}</em></li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% for field in form.visible_fields %}
+        {% if field.errors %}
+        <ul>
+        {% for error in field.errors %}
+            <li><em>{{ error|escape }}</em></li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        <p>{{ field.label_tag }}<br>{{ field }}<br>
+        {{ field.help_text }}</p>
+
+
+    {% endfor %}
+
+
+
+
+<input type="submit" value="Добавить!">
 </form>
 {% endblock %}
 
